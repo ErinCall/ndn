@@ -3,19 +3,25 @@ import System.Random
 
 main = do
     expression <- getArgs
-    gen <- getStdGen
-    putStrLn $ show $ ndn expression gen
+    result <- ndn expression
+    putStrLn $ show result
 
-ndn :: (RandomGen g) => [String] -> g -> Int
-ndn (numDice : _ : dieSize : _) = rollDice (read numDice) (read dieSize)
+ndn :: [String] -> IO Int
+ndn (numDice : "d" : dieSize : _) = rollDice (read numDice) (read dieSize)
 
-rollDice :: (RandomGen g) => Int -> Int -> g -> Int
-rollDice 1 dieSize g = rollDie dieSize g
-rollDice n dieSize g = let (roll, newGen) = rollDie' dieSize g
-                       in roll + (rollDice (n - 1) dieSize newGen)
+rollDice :: Int -> Int -> IO Int
+rollDice 1 dieSize = rollDie dieSize
+rollDice n dieSize = do
+    thisRoll <- rollDie dieSize
+    otherRolls <- rollDice (n - 1) dieSize
+    return $ thisRoll + otherRolls
 
-rollDie :: (RandomGen g) => Int -> g -> Int
-rollDie size = fst . rollDie' size
+rollDie :: Int -> IO Int
+rollDie dieSize = do
+    (roll, _) <- rollDie' dieSize
+    return roll
 
-rollDie' :: (RandomGen g) => Int -> g -> (Int, g)
-rollDie' dieSize = randomR (1, dieSize)
+rollDie' :: Int -> IO (Int, StdGen)
+rollDie' dieSize = do
+    gen <- newStdGen
+    return $ randomR (1, dieSize) gen
