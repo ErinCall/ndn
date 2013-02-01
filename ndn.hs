@@ -20,8 +20,6 @@ rollDie :: Int -> IO Int
 rollDie dieSize = do
     (roll, _) <- rollDie' dieSize
     return roll
-
-rollDie' :: Int -> IO (Int, StdGen)
-rollDie' dieSize = do
-    gen <- newStdGen
-    return $ randomR (1, dieSize) gen
+    where rollDie' dieSize = do
+            gen <- newStdGen
+            return $ randomR (1, dieSize) gen
