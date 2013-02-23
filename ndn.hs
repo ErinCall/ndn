@@ -1,10 +1,15 @@
 import System.Environment
 import System.Random
 
+import Parser (parse)
+
 main = do
     expression <- getArgs
-    result <- ndn expression
-    putStrLn $ show result
+    case parse $ unwords expression of
+        Left err -> print err
+        Right input -> do
+            result <- ndn input
+            putStrLn $ show result
 
 ndn :: [String] -> IO Int
 ndn (numDice : "d" : dieSize : _) = rollDice (read numDice) (read dieSize)
