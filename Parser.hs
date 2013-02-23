@@ -1,25 +1,38 @@
 module Parser
-( parse
+(
+    parse,
+    ParseResult (DieRoll,Number),
 ) where
 
 import Text.ParserCombinators.Parsec hiding (parse)
 import qualified Text.ParserCombinators.Parsec (parse)
 
-expression :: GenParser Char st [String]
+data ParseResult = DieRoll | Whitespace | Number String
+    deriving (Eq, Show)
+
+expression :: GenParser Char st [ParseResult]
 expression = do
     result <- many term
     eof
-    let filtered = [ x | x <- result, x /= " " ]
+    let filtered = [ x | x <- result, x /= Whitespace ]
     return filtered
 
-term :: GenParser Char st String
-term = whitespace <|> (many1 digit) <|> operator
+term :: GenParser Char st ParseResult
+term = whitespace <|> number <|> operator
 
-operator = string "d"
+number = do
+    num <- many1 digit
+    return $ Number num
 
-whitespace = string " "
+operator = do
+    string "d"
+    return DieRoll
+
+whitespace = do
+    string " "
+    return Whitespace
 
 --
 
-parse :: String -> Either ParseError [String]
+parse :: String -> Either ParseError [ParseResult]
 parse input = Text.ParserCombinators.Parsec.parse expression "" input

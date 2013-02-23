@@ -1,7 +1,7 @@
 import System.Environment
 import System.Random
 
-import Parser (parse)
+import Parser
 
 main = do
     expression <- getArgs
@@ -11,8 +11,9 @@ main = do
             result <- ndn input
             putStrLn $ show result
 
-ndn :: [String] -> IO Int
-ndn (numDice : "d" : dieSize : _) = rollDice (read numDice) (read dieSize)
+ndn :: [ParseResult] -> IO Int
+ndn ((Number numDice) : DieRoll : (Number dieSize) : _) =
+        rollDice (read numDice) (read dieSize)
 
 rollDice :: Int -> Int -> IO Int
 rollDice 1 dieSize = rollDie dieSize
