@@ -8,6 +8,7 @@ import qualified Text.ParserCombinators.Parsec (parse)
 expression :: GenParser Char st [String]
 expression = do
     result <- many term
+    eof
     let filtered = [ x | x <- result, x /= " " ]
     return filtered
 
