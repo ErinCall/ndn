@@ -24,13 +24,9 @@ number = do
     num <- many1 digit
     return $ Number num
 
-operator = do
-    string "d"
-    return DieRoll
+operator = string "d" >> return DieRoll
 
-whitespace = do
-    string " "
-    return Whitespace
+whitespace = string " " >> return Whitespace
 
 --
 
