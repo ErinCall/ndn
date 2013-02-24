@@ -9,15 +9,23 @@ main = do
     case parse $ statement of
         Left err -> print err
         Right input -> do
-            result <- ndn input
+            result <- evaluate input
             putStrLn $ show result
 
-ndn :: [ParseResult] -> IO Int
-ndn ((Number numDice) : DieRoll : (Number dieSize) : _) =
-        rollDice numDice dieSize
-ndn ((Number left) : Add : (Number right) : _) = return $ left + right
-ndn ((Number left) : Subtract : (Number right) : _) = return $ left - right
-ndn ((Number left) : Multiply : (Number right) : _) = return $ left * right
+evaluate :: Expression -> IO Int
+evaluate (Number n) = return n
+evaluate (Add left right) = arithmetic left right (+)
+evaluate (Multiply left right) = arithmetic left right (*)
+evaluate (Subtract left right) = arithmetic left right (-)
+evaluate (DieRoll left right) = do
+    numDice <- evaluate left
+    dieSize <- evaluate right
+    rollDice numDice dieSize
+
+arithmetic left right op = do
+    l <- evaluate left
+    r <- evaluate right
+    return $ op l r
 
 rollDice :: Int -> Int -> IO Int
 rollDice 1 dieSize = rollDie dieSize

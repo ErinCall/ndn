@@ -1,38 +1,48 @@
 module Parser
 (
     parse,
-    ParseResult (Number, DieRoll, Add, Subtract, Multiply),
+    Expression (Number, Add, Multiply, Subtract, DieRoll),
 ) where
 
 import Text.ParserCombinators.Parsec hiding (parse)
 import qualified Text.ParserCombinators.Parsec (parse)
+import Text.ParserCombinators.Parsec.Expr
 
-data ParseResult = DieRoll
-                 | Add
-                 | Subtract
-                 | Multiply
-                 | Number Int
-    deriving (Eq, Show)
+data Expression = Number Int
+                | Add Expression Expression
+                | Subtract Expression Expression
+                | Multiply Expression Expression
+                | DieRoll Expression Expression
+    deriving (Show)
 
-expression :: GenParser Char st [ParseResult]
-expression = do
-    result <- many term
+statement :: GenParser Char st Expression
+statement = do
+    result <- expression
     eof
     return result
 
-term :: GenParser Char st ParseResult
-term = number <|> operator
+expression = buildExpressionParser table factor
+             <?> "expression"
+
+table = [[op "*" Multiply AssocLeft, op "d" DieRoll AssocLeft],
+         [op "+" Add AssocLeft,      op "-" Subtract AssocLeft]]
+      where
+        op s f assoc = Infix (string s >> return f) assoc
+
+factor = do
+    char '('
+    x <- expression
+    char ')'
+    return x
+    <|> number
+    <?> "simple expression"
 
 number = do
     num <- many1 digit
     return $ Number $ read num
-
-operator = (string "d" >> return DieRoll)
-       <|> (string "+" >> return Add)
-       <|> (string "*" >> return Multiply)
-       <|> (string "-" >> return Subtract)
+    <?> "number"
 
 --
 
-parse :: String -> Either ParseError [ParseResult]
-parse input = Text.ParserCombinators.Parsec.parse expression "" input
+parse :: String -> Either ParseError Expression
+parse input = Text.ParserCombinators.Parsec.parse statement "" input
