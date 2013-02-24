@@ -1,13 +1,18 @@
 module Parser
 (
     parse,
-    ParseResult (DieRoll,Number),
+    ParseResult (Number, DieRoll, Add, Subtract, Multiply),
 ) where
 
 import Text.ParserCombinators.Parsec hiding (parse)
 import qualified Text.ParserCombinators.Parsec (parse)
 
-data ParseResult = DieRoll | Whitespace | Number String
+data ParseResult = DieRoll
+                 | Add
+                 | Subtract
+                 | Multiply
+                 | Whitespace
+                 | Number String
     deriving (Eq, Show)
 
 expression :: GenParser Char st [ParseResult]
@@ -24,7 +29,10 @@ number = do
     num <- many1 digit
     return $ Number num
 
-operator = string "d" >> return DieRoll
+operator = (string "d" >> return DieRoll)
+       <|> (string "+" >> return Add)
+       <|> (string "*" >> return Multiply)
+       <|> (string "-" >> return Subtract)
 
 whitespace = string " " >> return Whitespace
 
