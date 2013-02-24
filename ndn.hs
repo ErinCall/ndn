@@ -4,8 +4,9 @@ import System.Random
 import Parser
 
 main = do
-    expression <- getArgs
-    case parse $ unwords expression of
+    arguments <- getArgs
+    let statement = foldl (++) "" arguments
+    case parse $ statement of
         Left err -> print err
         Right input -> do
             result <- ndn input

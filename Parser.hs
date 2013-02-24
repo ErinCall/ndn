@@ -11,7 +11,6 @@ data ParseResult = DieRoll
                  | Add
                  | Subtract
                  | Multiply
-                 | Whitespace
                  | Number String
     deriving (Eq, Show)
 
@@ -19,11 +18,10 @@ expression :: GenParser Char st [ParseResult]
 expression = do
     result <- many term
     eof
-    let filtered = [ x | x <- result, x /= Whitespace ]
-    return filtered
+    return result
 
 term :: GenParser Char st ParseResult
-term = whitespace <|> number <|> operator
+term = number <|> operator
 
 number = do
     num <- many1 digit
@@ -33,8 +31,6 @@ operator = (string "d" >> return DieRoll)
        <|> (string "+" >> return Add)
        <|> (string "*" >> return Multiply)
        <|> (string "-" >> return Subtract)
-
-whitespace = string " " >> return Whitespace
 
 --
 
