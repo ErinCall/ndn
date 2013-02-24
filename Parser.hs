@@ -11,7 +11,7 @@ data ParseResult = DieRoll
                  | Add
                  | Subtract
                  | Multiply
-                 | Number String
+                 | Number Int
     deriving (Eq, Show)
 
 expression :: GenParser Char st [ParseResult]
@@ -25,7 +25,7 @@ term = number <|> operator
 
 number = do
     num <- many1 digit
-    return $ Number num
+    return $ Number $ read num
 
 operator = (string "d" >> return DieRoll)
        <|> (string "+" >> return Add)

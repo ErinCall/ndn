@@ -14,10 +14,10 @@ main = do
 
 ndn :: [ParseResult] -> IO Int
 ndn ((Number numDice) : DieRoll : (Number dieSize) : _) =
-        rollDice (read numDice) (read dieSize)
-ndn ((Number left) : Add : (Number right) : _) = return $ (read left) + (read right)
-ndn ((Number left) : Subtract : (Number right) : _) = return $ (read left) - (read right)
-ndn ((Number left) : Multiply : (Number right) : _) = return $ (read left) * (read right)
+        rollDice numDice dieSize
+ndn ((Number left) : Add : (Number right) : _) = return $ left + right
+ndn ((Number left) : Subtract : (Number right) : _) = return $ left - right
+ndn ((Number left) : Multiply : (Number right) : _) = return $ left * right
 
 rollDice :: Int -> Int -> IO Int
 rollDice 1 dieSize = rollDie dieSize
